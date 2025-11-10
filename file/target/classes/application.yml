@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.208.129:3306/content_db?severTimezone=UTC
+    username: root
+    password: 111111
+
+  application:
+    name: file-service
+  cloud:
+    nacos:
+      server-addr: 192.168.214.1:8848
+  lettuce:
+    pool:
+      max-active: 8
+      max-idle: 8
+      min-idle: 2
+      max-wait: -1
+      time-between-eviction-runs:
+
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: 3157153831@qq.com
+    password: tvotknudkgnrdhda
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+  data:
+    redis:
+      host: 192.168.208.129
+      port: 6379
+      database: 0
+      timeout: 3000
+
+server:
+  port: 8084

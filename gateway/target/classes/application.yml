@@ -1,0 +1,36 @@
+server:
+  port: 10010
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      server-addr: 192.168.214.1:8848
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/user/**
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/order/**
+            - id: content-service
+              uri: lb://content-service
+              predicates:
+                - Path=/content/**
+            - id: file-service
+              uri: lb://file-service
+              predicates:
+                - Path=/file/**
+gateway:
+  auth:
+    exclude-paths:
+      - /user/login
+
+jwt:
+  secret: your-32bytes-secret-key-12345678
+  expire-hours: 2
