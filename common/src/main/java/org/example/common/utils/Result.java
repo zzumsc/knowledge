@@ -1,5 +1,4 @@
-package org.example.file.pojo.dto;
-
+package org.example.common.utils;
 
 import lombok.Data;
 

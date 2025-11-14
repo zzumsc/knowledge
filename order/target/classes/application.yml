@@ -38,6 +38,20 @@ spring:
 server:
   port: 8081
 
+jwt:
+  secret: your-32bytes-secret-key-12345678
+  expire-hours: 2
+
+user:
+  context:
+    interceptor:
+      userId-header: user-id
+      include-paths:
+        - /order/**
+        - /user/order
+        - /content/order
+      exclude-paths:
+
 #mybatis:
 #  configuration:
 #    map-underscore-to-camel-case: true

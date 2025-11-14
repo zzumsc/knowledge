@@ -36,11 +36,9 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         if (isExcludePath(request.getPath().toString())) {
             return chain.filter(exchange);
         }
-        System.out.println(request);
         // 2. 提取Authorization请求头（处理Bearer前缀）
         String token = extractToken(request);
 
-        System.out.println(token);
         // 3. 解析JWT令牌，获取用户ID
         Long userId;
         try {
@@ -49,9 +47,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             // 4. 令牌无效，返回401未授权响应
             return handleUnauthorizedResponse(exchange, e.getMessage());
         }
-
-        System.out.println(userId);
-
+        if(userId == null){return null;}
         // 5. 传递用户信息：添加请求头user-id（下游服务可通过该头获取用户ID）
         ServerHttpRequest modifiedRequest = request.mutate()
                 .header("user-id", userId.toString())

@@ -2,6 +2,7 @@ package org.example.user.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
+import org.example.common.utils.UserContext;
 import org.example.user.dao.InfoDao;
 import org.example.user.pojo.User;
 import org.example.user.pojo.dto.UserDTO;
@@ -23,15 +24,15 @@ public class InfoServiceImpl extends ServiceImpl<InfoDao, User> implements IInfo
     private RedisTemplate<String, Object> redisTemplate;
     @Override
     public UserDTO getMyInfo() {
-        Long id;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            // 认证成功时，principal是UserDetails对象，从中获取用户名
-            id = Long.valueOf(((UserDetails) principal).getUsername());
-        } else {
-            // 未认证或匿名用户，直接转换为String（如"anonymousUser"）
-            id = Long.valueOf(principal.toString());
-        }
+        Long id= UserContext.getCurrentUser();
+//        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        if (principal instanceof UserDetails) {
+//            // 认证成功时，principal是UserDetails对象，从中获取用户名
+//            id = Long.valueOf(((UserDetails) principal).getUsername());
+//        } else {
+//            // 未认证或匿名用户，直接转换为String（如"anonymousUser"）
+//            return null;
+//        }
         User user=(User)redisTemplate.opsForValue().get(MY_USER_INFO+id);
         if(user==null){
             user=query().eq("id", id).one();
@@ -39,6 +40,7 @@ public class InfoServiceImpl extends ServiceImpl<InfoDao, User> implements IInfo
         }
         UserDTO userDTO=new UserDTO();
         BeanUtils.copyProperties(user,userDTO);
+        userDTO.setId(id);
         return userDTO;
     }
 }

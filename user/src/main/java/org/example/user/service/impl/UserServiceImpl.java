@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.example.common.utils.UserContext;
 import org.example.common.utils.JwtTool;
+import org.example.user.clients.OrderClient;
 import org.example.user.dao.UserDao;
 import org.example.user.pojo.User;
 import org.example.user.pojo.dto.LoginDTO;
-import org.example.user.pojo.dto.Result;
+import org.example.common.utils.Result;
+import org.example.user.service.IInfoService;
 import org.example.user.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -27,7 +29,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements IUser
 //    private AuthenticationManager authenticationManager;
 
     @Resource
-    private RedisTemplate<String, Object> redisTemplate;
+    private RedisTemplate<String, User> redisTemplate;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -63,7 +65,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements IUser
         // 保持不变：从UserContext获取GlobalFilter传递的userId
         Long id = UserContext.getCurrentUser();
         System.out.println(id);
-        User user = (User) redisTemplate.opsForValue().get(MY_USER_INFO + id);
+        User user = redisTemplate.opsForValue().get(MY_USER_INFO + id);
         if (user == null) {
             user = query().eq("id", id).one();
             redisTemplate.opsForValue().set(MY_USER_INFO + id, user, USER_INFO_TIME, TimeUnit.MINUTES);
@@ -89,6 +91,17 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements IUser
             return Result.ok("更新成功");
         }
         return Result.fail("更新失败");
+    }
+
+    @Autowired
+    private OrderClient orderClient;
+    @Autowired
+    private IInfoService infoService;
+
+    @Override
+    public Result getMyUserOrder() {
+        Long order_num=orderClient.getMyUserOrderNum();
+        return Result.ok("用户和订单数查询成功").put("User",infoService.getMyInfo()).put("order_num", order_num);
     }
 
     /**

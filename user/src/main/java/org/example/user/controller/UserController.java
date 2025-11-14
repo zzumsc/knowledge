@@ -3,7 +3,7 @@ package org.example.user.controller;
 import jakarta.annotation.Resource;
 import org.example.user.pojo.User;
 import org.example.user.pojo.dto.LoginDTO;
-import org.example.user.pojo.dto.Result;
+import org.example.common.utils.Result;
 import org.example.user.pojo.dto.UserDTO;
 import org.example.user.service.IInfoService;
 import org.example.user.service.IUserService;
@@ -34,4 +34,6 @@ public class UserController {
         return userService.updateMyUserInfo(user);
     }
 
+    @GetMapping("/order")
+    public Result order() {return userService.getMyUserOrder();}
 }

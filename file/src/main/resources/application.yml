@@ -37,3 +37,22 @@ spring:
 
 server:
   port: 8084
+
+jwt:
+  secret: your-32bytes-secret-key-12345678
+  expire-hours: 2
+
+minio:
+  endpoint: http://192.168.208.129:9000  # 你的MinIO服务器IP+端口（控制台端口9001，API端口9000）
+  access-key: minioadmin  # 你设置的MinIO管理员账号（自定义的MINIO_ROOT_USER）
+  secret-key: minioadmin  # 你设置的MinIO密码（自定义的MINIO_ROOT_PASSWORD，至少8位）
+  bucket-name: knowledge  # 默认存储桶名称（需提前在MinIO控制台创建，或通过代码自动创建）
+  secure: false  # 是否启用HTTPS（
+
+user:
+  context:
+    interceptor:
+      userId-header: user-id
+      include-paths:
+        - /file/**
+      exclude-paths:

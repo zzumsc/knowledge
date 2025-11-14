@@ -15,7 +15,6 @@ public class UserInfoInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         // 1. 直接提取网关传递的"user-id"头（值是数字，无需解析JWT）
         String userIdStr = request.getHeader("user-id");
-
         // 2. 转换为Long类型（避免NumberFormatException）
         if (userIdStr != null && !userIdStr.isEmpty()) {
             try {
