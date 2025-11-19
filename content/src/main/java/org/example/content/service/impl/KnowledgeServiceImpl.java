@@ -8,6 +8,7 @@ import org.example.content.clients.OrderClient;
 import org.example.content.dao.KnowledgeDao;
 import org.example.content.pojo.Knowledge;
 import org.example.content.pojo.KnowledgeResource;
+import org.example.content.pojo.dto.KnowledgeDTO;
 import org.example.content.pojo.vo.KnowledgeVO;
 import org.example.content.service.IKnowledgeResourceService;
 import org.example.content.service.IKnowledgeService;
@@ -15,8 +16,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -34,10 +38,16 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeDao,Knowledge> im
         return Result.ok("查询成功").put("knowledge",l);
     }
 
+    @Resource
+    IKnowledgeResourceService knowledgeService;
     @Override
+    @Transactional
     public Result postKnowledge(Knowledge knowledge) {
+        knowledge.setUserId(UserContext.getCurrentUser());
+        knowledge.setCreateTime(LocalDateTime.now());
         Boolean b=save(knowledge);
-        if(b==true)return Result.ok("发送成功");
+        //TODO 审核通过
+        if(b==true)return Result.ok("发布成功");
         else return Result.fail("发布失败");
     }
 
@@ -69,10 +79,14 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeDao,Knowledge> im
     @Override
     public Result getDetailById(Long id) {
         KnowledgeVO vo=new KnowledgeVO();
-        KnowledgeResource kr=knowledgeResourceService.getById(id);
-        BeanUtils.copyProperties(kr,vo);
-        vo.setKnowledgeId(kr.getId());
         BeanUtils.copyProperties(this.getById(id),vo);
+        Long sizeAll= 0L;
+        List<KnowledgeResource> kr=knowledgeResourceService.getAllByKnowledgeId(id);
+        for(KnowledgeResource kr1:kr){
+            sizeAll+=kr1.getSize();
+        }
+        vo.setSize(sizeAll);
+        vo.setKnowledgeResource(kr);
         return Result.ok("查询成功").put("knowledge",vo);
     }
 }

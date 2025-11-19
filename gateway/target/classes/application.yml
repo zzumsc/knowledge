@@ -21,11 +21,12 @@ spring:
             - id: content-service
               uri: lb://content-service
               predicates:
-                - Path=/content/**
+                - Path=/content/**,/resource/**
             - id: file-service
               uri: lb://file-service
               predicates:
                 - Path=/file/**
+
 gateway:
   auth:
     exclude-paths:

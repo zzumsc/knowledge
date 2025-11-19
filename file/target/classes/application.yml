@@ -34,6 +34,37 @@ spring:
       port: 6379
       database: 0
       timeout: 3000
+  servlet:
+    multipart:
+      enabled: true # 启用文件上传
+      max-file-size: 500MB # 单个文件最大大小（根据需求调整，如50GB）
+      max-request-size: 1GB # 单次请求总大小（需大于单个文件大小，支持多文件）
+      file-size-threshold: 10MB # 超过该大小的文件转磁盘存储（避免内存溢出）
+      location: /tmp/tomcat/upload # 临时文件存储路径（需确保目录存在且有读写权限）
 
 server:
-  port: 8084
+  port: 8086
+
+jwt:
+  secret: your-32bytes-secret-key-12345678
+  expire-hours: 2
+
+minio:
+  endpoint: http://192.168.208.129:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket-name: knowledge
+  secure: false
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+
+user:
+  context:
+    interceptor:
+      userId-header: user-id
+      include-paths:
+        - /file/**
+      exclude-paths:

@@ -27,10 +27,10 @@ public class CommonUserContextInterceptor implements HandlerInterceptor {
      * 接口执行前：读取请求头 userId，存入 ThreadLocal
      */
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         // 1. 从配置中获取请求头字段名（支持自定义）
         String userIdHeader = properties.getUserIdHeader();
-        // 2. 读取请求头中的 userId
+        // 2. 读取请求头中的 user-id
         String userIdStr = request.getHeader(userIdHeader);
         log.debug("{}: {}", userIdHeader, userIdStr);
 

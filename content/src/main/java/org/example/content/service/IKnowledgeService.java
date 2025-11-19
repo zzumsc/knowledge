@@ -3,6 +3,7 @@ package org.example.content.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.example.common.utils.Result;
 import org.example.content.pojo.Knowledge;
+import org.example.content.pojo.dto.KnowledgeDTO;
 
 import java.math.BigDecimal;
 

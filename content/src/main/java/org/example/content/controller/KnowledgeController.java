@@ -3,6 +3,8 @@ package org.example.content.controller;
 import jakarta.annotation.Resource;
 import org.example.content.pojo.Knowledge;
 import org.example.common.utils.Result;
+import org.example.content.pojo.dto.KnowledgeDTO;
+import org.example.content.pojo.vo.KnowledgeVO;
 import org.example.content.service.IKnowledgeService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +20,7 @@ public class KnowledgeController {
     }
 
     @PostMapping
-    public Result addKnowledge(@RequestBody Knowledge knowledge) {
+    public Result postKnowledge(@RequestBody Knowledge knowledge) {
         return knowledgeService.postKnowledge(knowledge);
     }
 

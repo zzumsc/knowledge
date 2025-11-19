@@ -4,7 +4,6 @@ spring:
     url: jdbc:mysql://192.168.208.129:3306/content_db?severTimezone=UTC
     username: root
     password: 111111
-
   application:
     name: file-service
   cloud:
@@ -34,6 +33,13 @@ spring:
       port: 6379
       database: 0
       timeout: 3000
+  servlet:
+    multipart:
+      enabled: true # 启用文件上传
+      max-file-size: 500MB # 单个文件最大大小（根据需求调整，如50GB）
+      max-request-size: 1GB # 单次请求总大小（需大于单个文件大小，支持多文件）
+      file-size-threshold: 10MB # 超过该大小的文件转磁盘存储（避免内存溢出）
+      location: /tmp/tomcat/upload # 临时文件存储路径（需确保目录存在且有读写权限）
 
 server:
   port: 8084
@@ -43,11 +49,16 @@ jwt:
   expire-hours: 2
 
 minio:
-  endpoint: http://192.168.208.129:9000  # 你的MinIO服务器IP+端口（控制台端口9001，API端口9000）
-  access-key: minioadmin  # 你设置的MinIO管理员账号（自定义的MINIO_ROOT_USER）
-  secret-key: minioadmin  # 你设置的MinIO密码（自定义的MINIO_ROOT_PASSWORD，至少8位）
-  bucket-name: knowledge  # 默认存储桶名称（需提前在MinIO控制台创建，或通过代码自动创建）
-  secure: false  # 是否启用HTTPS（
+  endpoint: http://192.168.208.129:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket-name: knowledge
+  secure: false
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
 
 user:
   context:

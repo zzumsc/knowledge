@@ -10,6 +10,17 @@ spring:
   cloud:
     nacos:
       server-addr: 192.168.214.1:8848
+    openfeign: # HttpClient连接池配置
+      httpclient:
+        enabled: true # 启用HttpClient连接池
+        max-connections: 200 # 最大总连接数
+        max-connections-per-route: 50 # 单个下游服务的最大连接数
+      # Feign客户端配置（针对file-service）
+      client:
+        config:
+          file-service: # 只对fileClient生效
+            connect-timeout: 3000 # 连接超时3秒
+            read-timeout: 10000 # 读取超时10秒
   lettuce:
     pool:
       max-active: 8
@@ -34,6 +45,13 @@ spring:
       port: 6379
       database: 0
       timeout: 3000
+  servlet:
+    multipart:
+          enabled: true # 启用文件上传
+          max-file-size: 500MB # 单个文件最大大小（根据需求调整，如50GB）
+          max-request-size: 1GB # 单次请求总大小（需大于单个文件大小，支持多文件）
+          file-size-threshold: 10MB # 超过该大小的文件转磁盘存储（避免内存溢出）
+          location: /tmp/tomcat/upload # 临时文件存储路径（需确保目录存在且有读写权限）
 
 server:
   port: 8083
@@ -48,4 +66,15 @@ user:
       userId-header: user-id
       include-paths:
         - /content/**
+        - /resource/**
       exclude-paths:
+
+logging:
+  level:
+    org.springframework.web: DEBUG # 打印请求参数绑定日志
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: threadpool,health,info

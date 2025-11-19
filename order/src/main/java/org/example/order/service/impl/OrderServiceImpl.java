@@ -1,6 +1,7 @@
 package org.example.order.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jakarta.annotation.Resource;
 import org.example.common.utils.Result;
 import org.example.common.utils.UserContext;
 import org.example.order.clients.ContentClient;
@@ -12,6 +13,7 @@ import org.example.order.service.IOrderService;
 import org.example.order.service.IPayRecordService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static org.example.order.util.RandomId.generateRandomId;
 import static org.example.order.util.RandomString.generateRandomString;
+import static org.example.order.util.utils.MY_ORDER_CONTENT;
 
 
 @Service
@@ -103,6 +106,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, Order> implements IO
         return Result.ok("订单生成成功").put("order",order);
     }
 
+    @Autowired
+    RedisTemplate<String,Object> redisTemplate;
     @Override
     @Transactional
     public Result payOrder(Long id) {
@@ -130,6 +135,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, Order> implements IO
             log.error("更新数据库购买信息失败");
             return Result.fail("请等待运维人员处理");
         }
+        redisTemplate.opsForValue().getAndDelete(MY_ORDER_CONTENT+UserContext.getCurrentUser());
         return Result.ok("购买成功");
     }
 
