@@ -36,4 +36,7 @@ public class UserController {
 
     @GetMapping("/order")
     public Result order() {return userService.getMyUserOrder();}
+
+    @PostMapping("/logout")
+    public Result logout() {return userService.logout();}
 }

@@ -20,4 +20,7 @@ public interface IOrderService extends IService<Order> {
 
     Result payOrder(Long id);
 
+    Result createOrderList(List<Long> l);
+
+    Result payOrderList(List<Long> l);
 }

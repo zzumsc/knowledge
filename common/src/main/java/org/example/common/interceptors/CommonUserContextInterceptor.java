@@ -6,6 +6,8 @@ import org.example.common.config.UserContextInterceptorProperties;
 import org.example.common.utils.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -23,6 +25,9 @@ public class CommonUserContextInterceptor implements HandlerInterceptor {
         this.properties = properties;
     }
 
+    public static final String JWT_BLACK_LIST = "jwt:blacklist:";
+    @Autowired
+    RedisTemplate<String,Object> redisTemplate;
     /**
      * 接口执行前：读取请求头 userId，存入 ThreadLocal
      */
@@ -40,9 +45,9 @@ public class CommonUserContextInterceptor implements HandlerInterceptor {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 未授权
             return false;
         }
-
+        Long userId = Long.parseLong(userIdStr);
+        if(redisTemplate.opsForValue().get(JWT_BLACK_LIST + userId)!=null) {return false;};
         try {
-            Long userId = Long.parseLong(userIdStr);
             UserContext.setUser(userId); // 存入 ThreadLocal
             log.debug("ThreadLocal 存入 userId: {}", userId);
         } catch (NumberFormatException e) {

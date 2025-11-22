@@ -4,7 +4,6 @@ spring:
     url: jdbc:mysql://192.168.208.129:3306/content_db?severTimezone=UTC
     username: root
     password: 111111
-
   application:
     name: file-service
   cloud:
@@ -43,7 +42,7 @@ spring:
       location: /tmp/tomcat/upload # 临时文件存储路径（需确保目录存在且有读写权限）
 
 server:
-  port: 8086
+  port: 8087
 
 jwt:
   secret: your-32bytes-secret-key-12345678

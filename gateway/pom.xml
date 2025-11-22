@@ -63,6 +63,10 @@
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
         <!-- 1. Spring Boot配置处理器（@ConfigurationProperties绑定） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

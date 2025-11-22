@@ -5,6 +5,9 @@ import org.example.order.service.IOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/order")
 public class OrderController {
@@ -22,8 +25,12 @@ public class OrderController {
     public Result createOrder(@PathVariable("id") Long id) {
         return orderService.createOrder(id);
     }
+    @PostMapping("/create/list")
+    public Result createOrderList(@RequestParam List<Long> l) {return orderService.createOrderList(l);}
     @PostMapping("/pay/{id}")
     public Result payOrder(@PathVariable("id") Long id) {
         return orderService.payOrder(id);
     }
+    @PostMapping("/pay/list")
+    public Result payOrderList(@RequestParam List<Long> l) {return orderService.payOrderList(l);}
 }
