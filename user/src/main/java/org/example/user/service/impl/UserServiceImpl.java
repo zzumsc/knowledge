@@ -19,8 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
-import static org.example.user.utils.utils.MY_USER_INFO;
-import static org.example.user.utils.utils.USER_INFO_TIME;
+import static org.example.user.utils.utils.*;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserDao, User> implements IUserService {
@@ -102,6 +101,15 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements IUser
     public Result getMyUserOrder() {
         Long order_num=orderClient.getMyUserOrderNum();
         return Result.ok("用户和订单数查询成功").put("User",infoService.getMyInfo()).put("order_num", order_num);
+    }
+
+    @Autowired
+    RedisTemplate<String,Object> redisTemplate1;
+    @Override
+    public Result logout() {
+        Long id = UserContext.getCurrentUser();
+        redisTemplate1.opsForValue().set(JWT_BLACK_LIST+id, true, JWT_BLACK_LIST_TIME, TimeUnit.HOURS);
+        return Result.ok("登出成功");
     }
 
     /**

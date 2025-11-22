@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -137,6 +138,106 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, Order> implements IO
         }
         redisTemplate.opsForValue().getAndDelete(MY_ORDER_CONTENT+UserContext.getCurrentUser());
         return Result.ok("购买成功");
+    }
+
+    @Override
+    @Transactional
+    public Result createOrderList(List<Long> l) {
+        if (l == null || l.isEmpty()) {
+            return Result.fail("知识ID列表不能为空");
+        }
+        Long userId = UserContext.getCurrentUser();
+        List<Order> orderList = new ArrayList<>();
+        List<Long> freeOrderIds = new ArrayList<>();
+        for (Long knowledgeId : l) {
+            Order existOrder = query().eq("user_id", userId).eq("knowledge_id", knowledgeId).one();
+            if (existOrder != null && existOrder.getStatus() == 1) {
+                return Result.fail("知识ID：" + knowledgeId + " 不能重复下单");
+            }
+            Long orderId = generateRandomId(userId);
+            Order duplicateOrder = query().eq("id", orderId).one();
+            if (duplicateOrder != null) {
+                if (timeDiff(LocalDateTime.now(), duplicateOrder.getCreateTime())) {
+                    removeById(duplicateOrder.getId());
+                } else {
+                    orderId = generateRandomId(userId);
+                }
+            }
+            Order order = new Order();
+            order.setId(orderId);
+            order.setUserId(userId);
+            order.setKnowledgeId(knowledgeId);
+            order.setOrderNo(generateRandomString(userId));
+            order.setCreateTime(LocalDateTime.now());
+            BigDecimal amount = contentClient.getPriceById(knowledgeId);
+            if (amount == null) {
+                return Result.fail("知识ID：" + knowledgeId + " 获取价格失败");
+            }
+            order.setAmount(amount);
+            if (amount.compareTo(BigDecimal.ZERO) == 0) {
+                order.setStatus(1);
+                freeOrderIds.add(orderId);
+            } else {
+                order.setStatus(0);
+                orderList.add(order);
+            }
+        }
+        for (Long freeOrderId : freeOrderIds) {
+            if (!payRecordService.savePayRecord(freeOrderId)) {
+                return Result.fail("免费订单支付记录保存失败，订单ID：" + freeOrderId);
+            }
+        }
+        if (!orderList.isEmpty()) {
+            boolean res = saveBatch(orderList);
+            if (!res) {
+                return Result.fail("收费订单批量生成失败");
+            }
+        }
+        return Result.ok("订单批量生成成功")
+                .put("chargeOrders", orderList)
+                .put("freeOrderCount", freeOrderIds.size());
+    }
+
+    @Override
+    @Transactional
+    public Result payOrderList(List<Long> l) {
+        if (l == null || l.isEmpty()) {
+            return Result.fail("订单ID列表不能为空");
+        }
+        Long userId = UserContext.getCurrentUser();
+        List<Order> validOrders = new ArrayList<>();
+        for (Long orderId : l) {
+            Order order = query().eq("id", orderId).eq("user_id", userId).one();
+            if (order == null) {
+                return Result.fail("订单ID：" + orderId + " 不存在");
+            }
+            Long knowledgeId = order.getKnowledgeId();
+            Integer status = contentClient.getStatusById(knowledgeId);
+            if (status == null || status == 0) {
+                return Result.fail("订单ID：" + orderId + " 对应的知识不存在");
+            }
+            if (status == 2) {
+                return Result.fail("订单ID：" + orderId + " 对应的知识已下架");
+            }
+            if (!timeDiff(LocalDateTime.now(), order.getCreateTime())) {
+                return Result.fail("订单ID：" + orderId + " 已过期");
+            }
+            validOrders.add(order);
+        }
+        //TODO 微信开放平台校验
+        if (false) return Result.fail("支付失败");
+        try {
+            List<Long> orderIds = validOrders.stream().map(Order::getId).collect(Collectors.toList());
+            update().in("id", orderIds).set("status", 1).update();
+            for (Long id : orderIds) {
+                payRecordService.savePayRecord(id);
+            }
+        } catch (Exception e) {
+            log.error("批量更新数据库购买信息失败");
+            return Result.fail("请等待运维人员处理");
+        }
+        redisTemplate.opsForValue().getAndDelete(MY_ORDER_CONTENT + userId);
+        return Result.ok("批量购买成功").put("paidOrderCount", validOrders.size());
     }
 
     private boolean timeDiff(LocalDateTime now, LocalDateTime createTime) {

@@ -657,15 +657,12 @@
 
 package org.example.file.utils;
 
+import io.minio.messages.*;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import com.google.common.io.ByteStreams;
 import io.minio.*;
 import io.minio.http.Method;
-import io.minio.messages.Bucket;
-import io.minio.messages.DeleteError;
-import io.minio.messages.DeleteObject;
-import io.minio.messages.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.example.file.config.MinIOConfig;
 import org.springframework.stereotype.Component;
@@ -680,12 +677,21 @@ import java.util.*;
 public class MinIOUtil {
     private MinioClient minioClient;
     private String bucketName;
+    private String endpoint="http://192.168.208.129:9000";
+    private String accessKey="minioadmin";
+    private String secretKey="minioadmin";
 
     public MinIOUtil(MinioClient minioClient, MinIOConfig minIOConfig) {
         this.minioClient = minioClient; // 注入 Spring 管理的 MinioClient（已配置好参数）
         this.bucketName = minIOConfig.getBucketName(); // 从配置类中获取桶名
     }
 
+    private MinioClient getClient() {
+        return MinioClient.builder()
+                .endpoint(endpoint)
+                .credentials(accessKey, secretKey)
+                .build();
+    }
     //桶操作
 
     /**
@@ -888,9 +894,15 @@ public class MinIOUtil {
         if (!StringUtils.hasText(aimFileName)) {
             aimFileName = UUID.randomUUID().toString();
         }
-        //获取文件后缀
+        // 获取文件后缀
         String originalFilename = multipartFile.getOriginalFilename();
-        String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String suffix = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+        } else {
+            // 如果没有扩展名，使用空字符串或默认扩展名
+            suffix = ""; // 或者可以根据需要设置默认扩展名，如 ".bin"
+        }
         aimFileName += suffix;
 
         //带路径的文件名

@@ -21,11 +21,17 @@ spring:
             - id: content-service
               uri: lb://content-service
               predicates:
-                - Path=/content/**,/resource/**
+                - Path=/content/**,/resource/**,/shop/**
             - id: file-service
               uri: lb://file-service
               predicates:
                 - Path=/file/**
+    sentinel:
+      transport:
+        dashboard: localhost:9999
+        port: 8719
+      web-context-unify: false # 关闭 URL 路径统一
+      eager: true # 饥饿加载
 
 gateway:
   auth:
@@ -35,3 +41,4 @@ gateway:
 jwt:
   secret: your-32bytes-secret-key-12345678
   expire-hours: 2
+

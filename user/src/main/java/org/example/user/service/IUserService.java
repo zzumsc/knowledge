@@ -14,4 +14,6 @@ public interface IUserService extends IService<User> {
     Result updateMyUserInfo(User user);
 
     Result getMyUserOrder();
+
+    Result logout();
 }

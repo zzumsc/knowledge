@@ -15,11 +15,20 @@ public class KnowledgeResourceController {
     IKnowledgeResourceService resourceService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    Result postByKnowledgeId(@RequestPart("file")MultipartFile file,
-                             @RequestPart("knowledgeId")String knowledgeId) {
+    public Result postByKnowledgeId(
+            @RequestPart("file") MultipartFile file,
+            @RequestParam("knowledgeId") String knowledgeId,
+            @RequestParam("fileMd5") String fileMd5,
+            @RequestParam(value = "chunkNum", required = false) Integer chunkNum,
+            @RequestParam(value = "totalChunks", required = false) Integer totalChunks,
+            @RequestParam("fileName") String fileName) {
         KnowledgeResourceDTO dto = new KnowledgeResourceDTO();
         dto.setKnowledgeId(Long.parseLong(knowledgeId));
         dto.setFile(file);
+        dto.setFileMd5(fileMd5);
+        dto.setChunkNum(chunkNum);
+        dto.setTotalChunks(totalChunks);
+        dto.setFileName(fileName);
         return resourceService.postByKnowledgeId(dto);
     }
     @GetMapping

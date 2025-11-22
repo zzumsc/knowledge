@@ -12,15 +12,14 @@ spring:
       server-addr: 192.168.214.1:8848
     openfeign: # HttpClient连接池配置
       httpclient:
-        enabled: true # 启用HttpClient连接池
         max-connections: 200 # 最大总连接数
         max-connections-per-route: 50 # 单个下游服务的最大连接数
       # Feign客户端配置（针对file-service）
       client:
         config:
           file-service: # 只对fileClient生效
-            connect-timeout: 3000 # 连接超时3秒
-            read-timeout: 10000 # 读取超时10秒
+            connect-timeout: 5000 # 连接超时5秒
+            read-timeout: 20000 # 读取超时20秒
   lettuce:
     pool:
       max-active: 8
@@ -52,6 +51,14 @@ spring:
           max-request-size: 1GB # 单次请求总大小（需大于单个文件大小，支持多文件）
           file-size-threshold: 10MB # 超过该大小的文件转磁盘存储（避免内存溢出）
           location: /tmp/tomcat/upload # 临时文件存储路径（需确保目录存在且有读写权限）
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: shopping_cart_producer_group  # 替换原${RocketMQConstant.XXX}
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+  consumer:
+    group: shopping_cart_consumer_group  # 替换原${RocketMQConstant.XXX}
 
 server:
   port: 8083
@@ -67,6 +74,7 @@ user:
       include-paths:
         - /content/**
         - /resource/**
+        - /shop/**
       exclude-paths:
 
 logging:

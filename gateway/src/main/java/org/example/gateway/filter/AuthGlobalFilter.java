@@ -1,5 +1,6 @@
 package org.example.gateway.filter;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gateway.config.AuthProperties;
@@ -23,6 +24,11 @@ import java.nio.charset.StandardCharsets;
 @Component
 @RequiredArgsConstructor
 @EnableConfigurationProperties(AuthProperties.class)
+@SentinelResource(
+        value = "AuthGlobalFilter", // 资源名（与静态规则中 resource 一致）
+        blockHandler = "handleBlock", // 限流/熔断处理
+        fallback = "handleFallback" // 业务异常处理
+)
 public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private final JwtTool jwtTool;
